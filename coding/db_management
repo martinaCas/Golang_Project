@@ -16,7 +16,7 @@ func main() {
 	/*
 	   Connect to my cluster
 	*/
-	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017/")) //secondo quanto visto, uri: mongodb://localhost:27017/
+	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017/"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -47,7 +47,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	//stampa ID
+	//stampa ID auto generato
 	fmt.Println(user_res.InsertedID)
 
 	/*	new_user(name, surname, email string, age int, phone string){
