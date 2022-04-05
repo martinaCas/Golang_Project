@@ -1,13 +1,7 @@
 package methods
 
 import (
-	"context"
 	"fmt"
-	"log"
-	"time"
-
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 /*metodo per inserire un nuovo utente
@@ -22,12 +16,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	err = client.Connect(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer client.Disconnect(ctx)
+
+func updateByAge(new_age int) {
+
+}
 
 	fmt.Println("ciao")
 
@@ -35,5 +27,4 @@ func main() {
 
 func insertNewUser(name, surname, email string, age int, phone string) {
 
-	fmt.Println("ciao")
 }
