@@ -1,0 +1,74 @@
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+)
+
+func main() {
+
+	/*
+	   Connect to my cluster
+	*/
+	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017/")) //secondo quanto visto, uri: mongodb://localhost:27017/
+	if err != nil {
+		log.Fatal(err)
+	}
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	err = client.Connect(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Disconnect(ctx)
+
+	/*------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
+	//new database
+	usersDatabase := client.Database("user_db")
+	//new collection
+	usersCollection := usersDatabase.Collection("user_details")
+
+	//insertOne
+	user_res, err := usersCollection.InsertOne(ctx, bson.D{
+		{Key: "name", Value: "Martina"},
+		{Key: "surname", Value: "Casalnuovo"},
+		{Key: "email", Value: "martinacasal_@outlook.it"},
+		{Key: "age", Value: "23"},
+		{Key: "phone", Value: "+39346029500"},
+	})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	//stampa ID
+	fmt.Println(user_res.InsertedID)
+
+	/*	new_user(name, surname, email string, age int, phone string){
+
+		new_user, err := usersCollection.InsertOne(ctx, bson.D{
+			{"name", name},
+		})
+	}*/
+
+	//List databases
+	/*databases, err := client.ListDatabaseNames(ctx, bson.M{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(databases)*/
+
+}
+
+/*
+func select_user(email string) {
+	if strings.Compare(email, "")!=0 {
+
+	}
+}*/
