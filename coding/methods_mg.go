@@ -45,8 +45,9 @@ func main() {
 	usersCollection := usersDatabase.Collection("user_details")
 
 	fmt.Println("PER INSERIRE UN NUOVO UTENTE, PREMI 1\n" +
-		"PER MODIFICARE UTENTE, PREMI 2\n" +
-		"PER ELIMINARE UN UTENTE, PREMI 3")
+		"PER MODIFICARE NUMERO TELEFONO UTENTE, PREMI 2\n" +
+		"PER MODIFICARE ETA' UTENTE, PREMI 3\n" +
+		"PER ELIMINARE UN UTENTE, PREMI 4")
 
 	var input int
 	fmt.Scanln(&input)
@@ -77,57 +78,89 @@ func main() {
 		fmt.Println("Complimenti! Hai inserito un nuovo utente!")
 
 	case 2:
-		var mail string = updateUser()
-		var new_name string
-		var new_surname string
-		var new_email string
-		var new_age string
+		//caso in cui si modifica il numero di cellulare di un utente, data la sua email
+		var e_mail = updateByPhone()
+
 		var new_phone string
+		fmt.Println("INSERISCI NUOVO NUMERO CELLULARE DELL'UTENTE CON LA SEGUENTE EMAIL: ", e_mail)
+		fmt.Scanln(&new_phone)
+		var nphone string = new_phone
 
-		var update_user User
+		fmt.Println(nphone)
 
-		if mail != "" && usersCollection.FindOne(ctx, bson.D{{Key: "email", Value: &mail}}) != nil {
+		if e_mail != "" {
+			fmt.Println(usersCollection.FindOne(ctx, bson.D{
+				{Key: "email", Value: e_mail},
+			}).DecodeBytes())
 
-			fmt.Println("INSERISCI NOME: ")
-			fmt.Scanln(&new_name)
-			update_user.name = new_name
-
-			fmt.Println("INSERISCI COGNOME: ")
-			fmt.Scanln(&new_surname)
-			update_user.surname = new_surname
-
-			fmt.Println("INSERISCI EMAIL: ")
-			fmt.Scanln(&new_email)
-			update_user.email = new_email
-
-			fmt.Println("INSERISCI ETA': ")
-			fmt.Scanln(&new_age)
-			update_user.age = new_age
-
-			fmt.Println("INSERISCI TELEFONO: ")
-			fmt.Scanln(&new_phone)
-			update_user.phone = new_phone
-			/*
-				usersCollection.ReplaceOne(ctx, bson.D{
-					{Key: "name", Value: new_name},
-					{Key: "surname", Value: new_surname},
-					{Key: "email", Value: new_email},
-					{Key: "age", Value: new_age},
-					{Key: "phone", Value: new_phone},
-				}, bson.D{
-					{Key: "age", Value: &new_age},
+			result := usersCollection.FindOneAndUpdate(ctx,
+				bson.M{"email": e_mail},
+				bson.D{
+					{"$set", bson.D{{"phone", new_phone}}},
 				},
-				)*/
+			)
 
+			fmt.Println("HAI MODIFICATO IL NUMERO DI CELLULARE COME RICHIESTO.")
+			fmt.Println(result.DecodeBytes())
 		}
+		/*
+			fmt.Println(usersCollection.FindOne(ctx, bson.D{
+				{Key: "email", Value: e_mail},
+			}).DecodeBytes())*/
 
 	case 3:
-		deleteUser()
+		//caso in cui si modifica l'età di un utente, data la sua email
+		var e_mail = updateByAge()
 
+		var new_age string
+		fmt.Println("INSERISCI NUOVA ETA' DELL'UTENTE CON LA SEGUENTE EMAIL: ", e_mail)
+		fmt.Scanln(&new_age)
+		var nage string = new_age
+
+		fmt.Println(nage)
+
+		if e_mail != "" {
+			fmt.Println(usersCollection.FindOne(ctx, bson.D{
+				{Key: "email", Value: e_mail},
+			}).DecodeBytes())
+
+			result := usersCollection.FindOneAndUpdate(ctx,
+				bson.M{"email": e_mail},
+				bson.D{
+					{"$set", bson.D{{"age", new_age}}},
+				},
+			)
+
+			fmt.Println("HAI MODIFICATO L'ETA' COME RICHIESTO.")
+			fmt.Println(result.DecodeBytes())
+		}
+
+		/*fmt.Println(usersCollection.FindOne(ctx, bson.D{
+			{Key: "email", Value: e_mail},
+		}).DecodeBytes())*/
+
+	case 4:
+		//caso in cui si elimina un utente, data la sua email
+		var e_mail = deleteUser()
+
+		if e_mail != "" {
+			fmt.Println(usersCollection.FindOne(ctx, bson.D{
+				{Key: "email", Value: e_mail},
+			}).DecodeBytes())
+			fmt.Println("UTENTE TROVATO: " + e_mail)
+
+			result := usersCollection.FindOneAndDelete(ctx, bson.M{"email": e_mail})
+
+			fmt.Println("HAI ELIMINATO L'UTENTE: " + e_mail)
+			fmt.Println(result.DecodeBytes())
+		}
+
+		/*	fmt.Println(usersCollection.FindOne(ctx, bson.D{
+			{Key: "email", Value: e_mail},
+		}).DecodeBytes())*/
 	}
 
 	defer client.Disconnect(ctx)
-
 }
 
 //metodo per inserire un nuovo utente
@@ -165,29 +198,17 @@ func insertNewUser() User {
 	return newUser
 }
 
-//modifica età utente
-/*func updateByAge() string {
+//modifica numero cellulare utente
+func updateByPhone() string {
 	fmt.Println("QUALE UTENTE INTENDI MODIFICARE? DIGITA LA SUA MAIL")
 	var mail string
 	fmt.Scanln(&mail)
 
-	//if la mail è contenuta nella lista di mail presa tramite query dal db, allora procedi con la modifica di età dell'utente
-
 	return mail
-}*/
-/*
-//modifica numero cellulare utente
-func updateByPhone() string {
-	fmt.Println("QUALE UTENTE INTENDI MODIFICARE? DIGITA LA SUA MAIL")
-	var phone string
-	fmt.Scanln(&phone)
+}
 
-	//if la mail è contenuta nella lista di mail presa tramite query dal db, allora procedi con la modifica di numero di telefono dell'utente
-	return phone
-}*/
-
-//metodo per modificare utente
-func updateUser() string {
+//modifica età utente
+func updateByAge() string {
 	fmt.Println("QUALE UTENTE INTENDI MODIFICARE? DIGITA LA SUA MAIL")
 	var mail string
 	fmt.Scanln(&mail)
@@ -201,6 +222,5 @@ func deleteUser() string {
 	var mail string
 	fmt.Scanln(&mail)
 
-	//if la mail è contenuta nella lista di mail presa tramite query dal db, allora procedi con l'eliminazione dell'utente
 	return mail
 }
