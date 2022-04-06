@@ -19,10 +19,6 @@ type User struct {
 	phone   string
 }
 
-/*metodo per inserire un nuovo utente
-  con i dati dati in input
-  quindi nome, cognome, email, età e numero telefono
-*/
 func main() {
 
 	//connect to db
@@ -54,6 +50,7 @@ func main() {
 
 	switch input {
 	case 1:
+		//caso di inserimento nuovo utente
 		var user_result User = insertNewUser()
 		var name string = user_result.name
 		var surname string = user_result.surname
